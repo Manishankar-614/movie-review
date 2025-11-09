@@ -1,0 +1,61 @@
+{% extends "layout_app.html" %}
+
+{% block title %}{{ movie_data.Title if movie_data else 'Movie Details' }}{% endblock %}
+
+{% block content %}
+{% if movie_data %}
+<div class="card animate-fade-in">
+    <div class="movie-result">
+        <div class="movie-poster">
+            <img src="{{ movie_data.Poster if movie_data.Poster != 'N/A' else 'https://placehold.co/150x220/333/fff?text=No+Poster' }}" alt="Poster for {{ movie_data.Title }}">
+        </div>
+        <div class="movie-details">
+            <h3>{{ movie_data.Title }} ({{ movie_data.Year }})</h3>
+            <p><strong>IMDb Rating:</strong> {{ movie_data.imdbRating }}</p>
+            <p><strong>Genre:</strong> {{ movie_data.Genre }}</p>
+            <p><strong>Plot:</strong> {{ movie_data.Plot }}</p>
+            <p><strong>Director:</strong> {{ movie_data.Director }}</p>
+            <p><strong>Actors:</strong> {{ movie_data.Actors }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="card animate-fade-in">
+    <h2>Add Your Review for {{ movie_data.Title }}</h2>
+    <form action="{{ url_for('predict') }}" method="POST">
+        <input type="hidden" name="imdb_id" value="{{ movie_data.imdbID }}">
+        <textarea name="review_text" placeholder="e.g., 'This movie was fantastic!'" required></textarea>
+        <br>
+        <input type="submit" value="Submit Review" class="btn btn-primary">
+    </form>
+</div>
+
+<div class="card animate-fade-in">
+    <h2>Community Sentiment</h2>
+    <div class="review-list">
+        {% if reviews_with_users %}
+            {% for review, user in reviews_with_users %}
+                <div class="card review-item community-review-item">
+                    <div class="review-author">
+                        <strong>{{ user.username }}</strong> wrote:
+                    </div>
+                    <p>"{{ review.content }}"</p>
+                    <div class="review-details {{ 'positive' if review.sentiment == 'Positive' else 'negative' }}">
+                        <strong>{{ review.sentiment }}</strong>
+                        (Confidence: {{ (review.confidence * 100)|round(1) }}%)
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Be the first to review this movie!</p>
+        {% endif %}
+    </div>
+</div>
+
+{% else %}
+<div class="card animate-fade-in">
+    <h2>Movie Not Found</h2>
+    <p>Sorry, we couldn't find the details for this movie. <a href="{{ url_for('movie') }}">Try searching again.</a></p>
+</div>
+{% endif %}
+{% endblock %}

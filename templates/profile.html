@@ -1,0 +1,59 @@
+{% extends "layout_app.html" %}
+
+{% block title %}{{ current_user.username }}'s Profile{% endblock %}
+
+{% block content %}
+<div class="card animate-fade-in">
+    <h2>{{ current_user.username }}'s Dashboard</h2>
+</div>
+
+<div class="card stats-card animate-fade-in">
+    <div class="stat-item">
+        <span class="stat-value">{{ stats.total }}</span>
+        <span class="stat-label">Total Reviews</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-value">{{ stats.positive }}</span>
+        <span class="stat-label">Positive Reviews</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-value">{{ stats.negative }}</span>
+        <span class="stat-label">Negative Reviews</span>
+    </div>
+    <div class="stat-item-full">
+        <span class="stat-label">Sentiment Breakdown</span>
+        <div class="sentiment-bar">
+            <div class="bar-positive" style="width: {{ stats.positive_percent }}%;" title="Positive ({{ stats.positive_percent | round(1) }}%)"></div>
+            <div class="bar-negative" style="width: {{ stats.negative_percent }}%;" title="Negative ({{ stats.negative_percent | round(1) }}%)"></div>
+        </div>
+    </div>
+</div>
+
+<div class="card review-list-card animate-fade-in">
+    <h3>Your Submitted Reviews</h3>
+    <div class="review-list">
+        {% if reviews %}
+            {% for review in reviews %}
+                <div class="card review-item community-review-item">
+                    {% if review.imdb_id %}
+                        <div class="review-author">
+                            Reviewed <a href="{{ url_for('movie_details', imdb_id=review.imdb_id) }}">this movie</a>:
+                        </div>
+                    {% else %}
+                        <div class="review-author">
+                            General review:
+                        </div>
+                    {% endif %}
+                    <p>"{{ review.content }}"</p>
+                    <div class="review-details {{ 'positive' if review.sentiment == 'Positive' else 'negative' }}">
+                        <strong>{{ review.sentiment }}</strong>
+                        (Confidence: {{ (review.confidence * 100)|round(1) }}%)
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>You haven't saved any reviews yet. Go to the <a href="{{ url_for('app_index') }}">Analyzer</a> to submit one!</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

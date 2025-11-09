@@ -1,0 +1,84 @@
+{% extends "layout_app.html" %}
+
+{% block title %}Sentiment Analyzer{% endblock %}
+
+{% block content %}
+<div class="card animate-fade-in">
+    <h2>General Review Analyzer</h2>
+    <p>Enter any text (like a movie review) to find out if it's positive or negative. This review won't be linked to a specific movie.</p>
+    
+    <form id="analyzer-form">
+        <input type="hidden" name="is_ajax" value="true">
+        
+        <textarea name="review_text" placeholder="e.g., 'This movie was fantastic!'" required></textarea>
+        <br>
+        <div class="form-actions">
+            <input type="submit" value="Analyze" class="btn btn-primary">
+            <div class="loader" id="loader" style="display: none;"></div>
+        </div>
+    </form>
+
+    <div id="result-container" style="display: none;">
+        <div class="result" id="result-box">
+            <strong id="result-text"></strong>
+            <div class="result-confidence">
+                Confidence: <span id="result-confidence"></span>%
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('analyzer-form').addEventListener('submit', function(e) {
+        e.preventDefault(); // Stop the page from reloading
+        
+        const form = e.target;
+        const formData = new FormData(form);
+        const loader = document.getElementById('loader');
+        const submitButton = form.querySelector('input[type="submit"]');
+        const resultContainer = document.getElementById('result-container');
+        const resultBox = document.getElementById('result-box');
+        const resultText = document.getElementById('result-text');
+        const resultConfidence = document.getElementById('result-confidence');
+
+        // Show loader, hide button
+        loader.style.display = 'block';
+        submitButton.style.display = 'none';
+        resultContainer.style.display = 'none';
+
+        fetch("{{ url_for('predict') }}", {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Update result text and confidence
+                resultText.innerText = `Prediction: ${data.prediction_text}`;
+                resultConfidence.innerText = data.confidence;
+
+                // Update result box color
+                resultBox.classList.remove('positive', 'negative');
+                if (data.prediction === 1) {
+                    resultBox.classList.add('positive');
+                } else {
+                    resultBox.classList.add('negative');
+                }
+
+                // Show the result
+                resultContainer.style.display = 'block';
+            } else {
+                console.error("Prediction failed");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        })
+        .finally(() => {
+            // Hide loader, show button
+            loader.style.display = 'none';
+            submitButton.style.display = 'inline-block';
+        });
+    });
+</script>
+{% endblock %}

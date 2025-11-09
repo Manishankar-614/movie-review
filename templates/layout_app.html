@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SentimentAI{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+</head>
+<body class="app-layout">
+
+    <nav>
+        <div class="nav-left">
+            <a href="{{ url_for('app_index') }}" class="logo-text">SentimentAI</a>
+        </div>
+        <div class="nav-center">
+            <div class="nav-links">
+                <a href="{{ url_for('app_index') }}">Analyzer</a>
+                <a href="{{ url_for('movie') }}">Movie Rating</a>
+                <a href="{{ url_for('profile') }}">Profile</a>
+                {% if current_user.is_admin %}
+                    <a href="{{ url_for('admin') }}">Admin</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="nav-right">
+            <button id="theme-toggle" title="Toggle theme">
+                <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
+            <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+        </div>
+        <button id="mobile-menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </nav>
+    
+    <div id="mobile-menu">
+        <a href="{{ url_for('app_index') }}">Analyzer</a>
+        <a href="{{ url_for('movie') }}">Movie Rating</a>
+        <a href="{{ url_for('profile') }}">Profile</a>
+        {% if current_user.is_admin %}
+            <a href="{{ url_for('admin') }}">Admin</a>
+        {% endif %}
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+
+    <main class="app-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container-app">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        (function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const docElement = document.documentElement;
+
+            // Theme Toggle
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = docElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                docElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+
+            // Mobile Menu
+            mobileMenuToggle.addEventListener('click', () => {
+                mobileMenuToggle.classList.toggle('active');
+                mobileMenu.classList.toggle('active');
+            });
+        })();
+    </script>
+</body>
+</html>

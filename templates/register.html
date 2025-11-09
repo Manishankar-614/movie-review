@@ -1,0 +1,38 @@
+{% extends "layout_public.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="card auth-card">
+    <h2 class="logo-text">Create Account</h2>
+    
+    <div class="auth-description">
+        <p>Join to get access to your personal dashboard.</p>
+        <ul>
+            <li>🤖 Analyze any review with our ML model.</li>
+            <li>🎬 Browse movies and get IMDb ratings.</li>
+            <li>💾 Save your analyses to your profile.</li>
+            <li>🌟 Review specific movies and see community sentiment.</li>
+        </ul>
+    </div>
+    
+    <form action="{{ url_for('register') }}" method="POST">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" name="username" id="username" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" required>
+        </div>
+        <input type="submit" value="Register" class="btn btn-primary">
+    </form>
+    <div class="form-footer">
+        Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+    </div>
+</div>
+{% endblock %}

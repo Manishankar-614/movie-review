@@ -1,0 +1,39 @@
+{% extends "layout_app.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="card animate-fade-in">
+    <h2>Admin Dashboard</h2>
+    <p>All user reviews are listed below.</p>
+</div>
+
+<div class="review-list animate-fade-in">
+    {% if reviews_with_users %}
+        {% for review, user in reviews_with_users %}
+            <div class="card review-item admin-review-item">
+                <div class="admin-review-info">
+                    <p><strong>User:</strong> {{ user.username }} ({{ user.email }})</p>
+                    {% if review.imdb_id %}
+                        <p><strong>Movie:</strong> <a href="{{ url_for('movie_details', imdb_id=review.imdb_id) }}" target="_blank">View Movie ({{ review.imdb_id }})</a></p>
+                    {% endif %}
+                    <p>"{{ review.content }}"</p>
+                </div>
+                <div class="admin-review-actions">
+                    <div class="review-details {{ 'positive' if review.sentiment == 'Positive' else 'negative' }}">
+                        <strong>{{ review.sentiment }}</strong>
+                        (Conf: {{ (review.confidence * 100)|round(1) }}%)
+                    </div>
+                    <form action="{{ url_for('delete_review', review_id=review.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this review?');">
+                        <input type="submit" value="Delete" class="btn btn-danger">
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="card">
+            <p>No reviews have been submitted by any users yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

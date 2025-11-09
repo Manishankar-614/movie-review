@@ -1,0 +1,70 @@
+{% extends "layout_app.html" %}
+
+{% block title %}Find a Movie{% endblock %}
+
+{% block content %}
+<div class.="card animate-fade-in">
+    <h2>Browse by Category</h2>
+    <div class="category-buttons">
+        <a href="{{ url_for('movie', s='Action') }}" class="btn-category">Action</a>
+        <a href="{{ url_for('movie', s='Comedy') }}" class="btn-category">Comedy</a>
+        <a href="{{ url_for('movie', s='Sci-Fi') }}" class="btn-category">Sci-Fi</a>
+        <a href="{{ url_for('movie', s='Horror') }}" class="btn-category">Horror</a>
+        <a href="{{ url_for('movie', s='Drama') }}" class="btn-category">Drama</a>
+        <a href="{{ url_for('movie', s='Animation') }}" class="btn-category">Animation</a>
+        <a href="{{ url_for('movie', s='Thriller') }}" class="btn-category">Thriller</a>
+        <a href="{{ url_for('movie', s='Romance') }}" class="btn-category">Romance</a>
+        <a href="{{ url_for('movie', s='Adventure') }}" class="btn-category">Adventure</a>
+        <a href="{{ url_for('movie', s='Documentary') }}" class="btn-category">Documentary</a>
+    </div>
+</div>
+
+<div class="card animate-fade-in">
+    <h2>Find a Movie Rating</h2>
+    <p>Search for a movie title to get its IMDb rating and community reviews.</p>
+
+    <form action="{{ url_for('movie') }}" method="POST">
+        <div class="form-group">
+            <label for="movie_title">Movie Title</label>
+            <input type="text" name="movie_title" id="movie_title" placeholder="e.g., The Dark Knight" required>
+        </div>
+        <input type="submit" value="Search" class="btn btn-primary">
+    </form>
+</div>
+
+{% if search_results %}
+<div class="animate-fade-in">
+    <h2>Search Results for "{{ search_term }}"</h2>
+    
+    <div class="search-results-grid">
+        {% for result in search_results %}
+            <a href="{{ url_for('movie_details', imdb_id=result.imdbID) }}" class="movie-poster-card">
+                <img src="{{ result.Poster if result.Poster != 'N/A' else 'https://placehold.co/300x450/333/fff?text=No+Poster' }}" alt="Poster for {{ result.Title }}">
+                <div class="movie-poster-info">
+                    <strong>{{ result.Title }}</strong>
+                    <span>({{ result.Year }})</span>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+
+    {% if total_pages > 1 %}
+    <div class="pagination">
+        {% if current_page > 1 %}
+            <a href="{{ url_for('movie', s=search_term, page=current_page - 1) }}" class="pagination-link">&laquo; Previous</a>
+        {% else %}
+            <span class="pagination-link disabled">&laquo; Previous</span>
+        {% endif %}
+
+        <span class="page-info">Page {{ current_page }} of {{ total_pages }}</span>
+
+        {% if current_page < total_pages %}
+            <a href="{{ url_for('movie', s=search_term, page=current_page + 1) }}" class="pagination-link">Next &raquo;</a>
+        {% else %}
+            <span class="pagination-link disabled">Next &raquo;</span>
+        {% endif %}
+    </div>
+    {% endif %}
+    </div>
+{% endif %}
+{% endblock %}
