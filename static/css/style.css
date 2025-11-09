@@ -151,6 +151,9 @@ html, body {
 .auth-card .form-footer {
     color: var(--secondary-color);
 }
+.auth-card .auth-subheading {
+    color: var(--secondary-color);
+}
 
 .btn {
     display: inline-block;
@@ -310,7 +313,7 @@ html[data-theme="dark"] .sun { display: none; }
 .home-buttons .btn-secondary:hover { background-color: var(--text-light); }
 .auth-card .logo-text { text-align: center; margin-bottom: 10px; }
 
-/* NEW: Auth page description */
+/* Auth page description */
 .auth-description {
     text-align: left;
     font-size: 0.95em;
@@ -332,7 +335,6 @@ html[data-theme="dark"] .sun { display: none; }
 .auth-description li {
     margin-bottom: 5px;
 }
-/* END NEW Auth page description */
 
 
 /* Flash Messages */
