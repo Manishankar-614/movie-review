@@ -159,7 +159,8 @@ def movie():
         search_term = request.form.get('movie_title')
     
     if search_term:
-        api_.url = f'http://www.omdbapi.com/?s={search_term}&apikey={OMDB_API_KEY}&page={page}'
+        # --- THIS IS THE FIX ---
+        api_url = f'http://www.omdbapi.com/?s={search_term}&apikey={OMDB_API_KEY}&page={page}'
         try:
             response = requests.get(api_url)
             data = response.json()
@@ -214,7 +215,7 @@ def predict():
     review = Review(
         content=review_text, 
         sentiment=prediction_text, 
-        confidence=float(confidence),  # <-- THIS IS THE FIX
+        confidence=float(confidence),  # <-- This fix is already in your file
         user_id=current_user.id,
         imdb_id=imdb_id
     )
@@ -229,7 +230,7 @@ def predict():
             'status': 'success',
             'prediction_text': prediction_text,
             'prediction': int(prediction),
-            'confidence': f'{float(confidence)*100:.1f}' # <-- Added float() here too
+            'confidence': f'{float(confidence)*100:.1f}' # <-- This fix is already in your file
         })
     
     flash('Your review has been analyzed and saved!', 'success')
