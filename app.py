@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_bcrypt import Bcrypt
 from flask_caching import Cache
-from flask_migrate import Migrate  # <-- NEW: Import Migrate
+from flask_migrate import Migrate
 from dotenv import load_dotenv
 import joblib
 import numpy as np
@@ -19,31 +19,25 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
 
-# --- UPDATED: Secure keys & Database URL ---
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 OMDB_API_KEY = os.getenv('OMDB_API_KEY')
-
-# This is the new, smart Database URL
-# It uses the cloud DATABASE_URL if it exists (on Render)
-# Otherwise, it falls back to the local sqlite file
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'instance', 'site.db'))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# --- Caching Config ---
 app.config['CACHE_TYPE'] = 'simple'
 cache = Cache(app)
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
-migrate = Migrate(app, db)  # <-- NEW: Initialize Migrate
+migrate = Migrate(app, db) 
 
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 
 model = joblib.load('sentiment_model.joblib')
 
-# --- 2. DATABASE MODELS (Unchanged) ---
+# --- 2. DATABASE MODELS ---
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -64,7 +58,7 @@ class Review(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     imdb_id = db.Column(db.String(20), nullable=True)
 
-# --- 3. ADMIN DECORATOR (Unchanged) ---
+# --- 3. ADMIN DECORATOR ---
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -74,7 +68,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# --- 4. AUTHENTICATION & PUBLIC ROUTES (Unchanged) ---
+# --- 4. AUTHENTICATION & PUBLIC ROUTES ---
 @app.route("/")
 def home():
     if current_user.is_authenticated:
@@ -119,7 +113,7 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
-# --- 5. INTERNAL APP ROUTES (Unchanged) ---
+# --- 5. INTERNAL APP ROUTES ---
 @app.route("/app")
 @login_required
 def app_index():
@@ -165,7 +159,7 @@ def movie():
         search_term = request.form.get('movie_title')
     
     if search_term:
-        api_url = f'http://www.omdbapi.com/?s={search_term}&apikey={OMDB_API_KEY}&page={page}'
+        api_.url = f'http://www.omdbapi.com/?s={search_term}&apikey={OMDB_API_KEY}&page={page}'
         try:
             response = requests.get(api_url)
             data = response.json()
@@ -220,7 +214,7 @@ def predict():
     review = Review(
         content=review_text, 
         sentiment=prediction_text, 
-        confidence=confidence, 
+        confidence=float(confidence),  # <-- THIS IS THE FIX
         user_id=current_user.id,
         imdb_id=imdb_id
     )
@@ -235,13 +229,13 @@ def predict():
             'status': 'success',
             'prediction_text': prediction_text,
             'prediction': int(prediction),
-            'confidence': f'{confidence*100:.1f}'
+            'confidence': f'{float(confidence)*100:.1f}' # <-- Added float() here too
         })
     
     flash('Your review has been analyzed and saved!', 'success')
     return redirect(url_for('movie_details', imdb_id=imdb_id))
 
-# --- 6. ADMIN ROUTES (Unchanged) ---
+# --- 6. ADMIN ROUTES ---
 @app.route("/admin")
 @login_required
 @admin_required
@@ -264,7 +258,6 @@ def delete_review(review_id):
     return redirect(url_for('admin'))
 
 # --- 7. RUN THE APP ---
-# This part is only for local testing. Render will use Gunicorn.
 if __name__ == '__main__':
     with app.app_context():
         if not os.path.exists(os.path.join(basedir, 'instance')):
